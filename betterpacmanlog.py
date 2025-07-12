@@ -1,33 +1,45 @@
 #betterpacmanlog.py
-#Filters out all log entries made automatically, like during initial install
-#or through updates via pacman-Syu. Also filters out entries for dependencies.
+#Parses lines of text made during install, and through updates via pacman-Syu.
+#Also filters out entries for dependencies.
 
 filePath = "/var/log/pacman.log"
 
 initialParsedData = []
+initialSkippedData = []
 finalParsedData = []
-skippedData = []
+finalSkippedData = []
 
-counter1 = 0
+currentLine = ""
+lastLine = ""
 
-substr1 = "PACMAN"
-substr2 = "transaction started"
-substr3 = "+0000] ["
-substr4 = "--noconfirm"
+wantedLine = ["transaction started", "PACMAN"] 
+notWantedLine = ["+0000] [", "--noconfirm"]
 
- 
-with open (filePath, "rt") as logFile: 
+counter = -1
+wlCounterLength = len(wantedLine)
+wlCounterMax = wlCounterLength-1
+
+#Initial data parsing
+with open (filePath, "rt") as logFile:
     for line in logFile:
-        if substr1 in line:
-            initialParsedData.append(line.rstrip('\n'))
-        elif substr2 in line:
-            initialParsedData.append(line.rstrip('\n'))
-        else:
-            skippedData.append(line.rstrip('\n'))
-            
+        counter = -1
+        while counter < wlCounterMax:
+            counter = counter + 1
+            if wantedLine[counter] in line:
+                initialParsedData.append(line.rstrip('\n'))
+            else:
+                initialSkippedData.append(line.rstrip('\n'))
+
+#Final data parsing
 for element in initialParsedData:
-    if not substr3 in element:
-        if not substr4 in element:
-            finalParsedData.append(line)
-            print(element)
+    if not notWantedLine[0] in element:
+        finalParsedData.append(element)
+    else:
+        finalSkippedData.append(element)
+
+for element in finalParsedData:
+    print(element)
             
+#function for troubleshooting
+def printElements(passedList):
+    for element in passedList: print(element)
