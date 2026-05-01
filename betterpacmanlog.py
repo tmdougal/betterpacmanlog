@@ -1,45 +1,23 @@
 #betterpacmanlog.py
-#Parses lines of text made during install, and through updates via pacman-Syu.
-#Also filters out entries for dependencies.
+#Parses lines of text in pacman log to show only what packages you've installed with 'pacman -S'. Filters out
+#dependencies, packages you've uninstalled with '-R or 'Rns', and the multiple '-Syu's in the file.
 
 filePath = "/var/log/pacman.log"
 
-initialParsedData = []
-initialSkippedData = []
-finalParsedData = []
-finalSkippedData = []
+p1Filter= "[PACMAN] Running"
 
-currentLine = ""
-lastLine = ""
+allLinesList = []
+p1ParsedLinesList = []
+p1SkippedLinesList = []
 
-wantedLine = ["transaction started", "PACMAN"] 
-notWantedLine = ["+0000] [", "--noconfirm"]
-
-counter = -1
-wlCounterLength = len(wantedLine)
-wlCounterMax = wlCounterLength-1
-
-#Initial data parsing
 with open (filePath, "rt") as logFile:
     for line in logFile:
-        counter = -1
-        while counter < wlCounterMax:
-            counter = counter + 1
-            if wantedLine[counter] in line:
-                initialParsedData.append(line.rstrip('\n'))
-            else:
-                initialSkippedData.append(line.rstrip('\n'))
+        allLinesList.append(line.rstrip('\n'))
+        if p1Filter in line:
+            p1ParsedLinesList.append(line.rstrip('\n'))
+        else:
+            p1SkippedLinesList.append(line.rstrip('\n'))
 
-#Final data parsing
-for element in initialParsedData:
-    if not notWantedLine[0] in element:
-        finalParsedData.append(element)
-    else:
-        finalSkippedData.append(element)
-
-for element in finalParsedData:
+for element in p1ParsedLinesList:
     print(element)
-            
-#function for troubleshooting
-def printElements(passedList):
-    for element in passedList: print(element)
+
